@@ -172,5 +172,5 @@ cython_debug/
 # Generated files from tests
 tests/mesh_data
 
-# User dropbox
-examples/data
+# Example output
+examples/data/simplified
