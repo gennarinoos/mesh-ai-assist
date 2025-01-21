@@ -29,20 +29,16 @@ class NeuralMeshSimplifier():
         # Convert to a tensor
         tensor: Data = mesh_to_tensor(preprocesed_mesh)
         print(tensor)
-        # model_output = self.model(tensor)
+        model_output = self.model(tensor)
 
-        # x = tensor.x
-        # edge_index = tensor.edge_index
-        # input_data = Data(x=x, edge_index=edge_index)
-
-        x = torch.randn(10, 3)
-        edge_index = torch.tensor(
-            [[0, 1, 1, 2, 3, 4], [1, 0, 2, 1, 4, 3]], dtype=torch.long
-        )
-        pos = torch.randn(10, 3)
-        input_data = Data(x=x, edge_index=edge_index, pos=pos)
+        # x = torch.randn(10, 3)
+        # edge_index = torch.tensor(
+        #     [[0, 1, 1, 2, 3, 4], [1, 0, 2, 1, 4, 3]], dtype=torch.long
+        # )
+        # pos = torch.randn(10, 3)
+        # input_data = Data(x=x, edge_index=edge_index, pos=pos)
         
-        model_output = self.model(input_data)
+        # model_output = self.model(input_data)
 
         # Convert the model output into a mesh and return it
         vertices = model_output["sampled_vertices"].detach().numpy()

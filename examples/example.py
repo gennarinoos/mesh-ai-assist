@@ -43,7 +43,7 @@ for file_name in mesh_files:
             # Add the simplified geometry to the new scene
             simplified_scene.add_geometry(simplified_geom, geom_name=name)
     else:
-        raise ValueError("Invalid mesh type (expected Trimesh or Scene):", type(original_mesh), type(Trimesh))
+        raise ValueError("Invalid mesh type (expected Trimesh or Scene):", type(original_mesh))
 
     # Save the simplified scene
     simplified_dir = os.path.join(data_dir, "simplified")
