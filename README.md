@@ -1,24 +1,19 @@
-# Neural Mesh Simplification
+# Mesh AI Assist
 
-This repository contains an implementation of the paper "Neural Mesh Simplification" by Potamias et al. (CVPR 2022). The project aims to provide a fast, learnable method for mesh simplification that generates simplified meshes in real-time.
+A collection of AI tools to work with 3D Meshes.
+
+* Neural Mesh Simplification
+
+---
+
+## Neural Mesh Simplification
+
+From the paper "Neural Mesh Simplification" by Potamias et al. (CVPR 2022), this Python package provides a fast, learnable method for mesh simplification that generates simplified meshes in real-time.
 
 Research, methodology introduced in the [Neural Mesh Simplification paper](https://openaccess.thecvf.com/content/CVPR2022/papers/Potamias_Neural_Mesh_Simplification_CVPR_2022_paper.pdf), with the updated info shared in [supplementary material](https://openaccess.thecvf.com/content/CVPR2022/supplemental/Potamias_Neural_Mesh_Simplification_CVPR_2022_supplemental.pdf).
 
-This implementation could not have been done without the use of an LLM, specifically Claude Sonnet 3.5 by Anthropic. It was useful to create a project, upload the PDF of the papers there and use the custom instructions in [llm_instructions.txt](llm_instructions.txt). To steer the model, a copy of the file structure (which it helped create early on) is also useful. This can be created with the command `tree -F -I '*.ply|*.obj|*__pycache__*' > file_structure.txt` in the root directory of the project.
 
-It is also useful to keep an updated copy of the main components of the code-base in the LLM project. This can be done with the following command, and uploading the file to the project in Claude:
-
-```bash
-find losses metrics models tests utils trainer \
-    \( -type d -name "*__pycache__*" -o -name ".DS_Store" \) -prune -o -type f -print \
-    | while IFS= read -r filepath; do
-        echo "====== $filepath start ======" >> combined_output.txt
-        cat "$filepath" >> combined_output.txt
-        echo "====== end of $filepath ======" >> combined_output.txt
-    done
-```
-
-## Overview
+### Overview
 
 Neural Mesh Simplification is a novel approach to reduce the resolution of 3D meshes while preserving their appearance. Unlike traditional simplification methods that collapse edges in a greedy iterative manner, this method simplifies a given mesh in one pass using deep learning techniques.
 
@@ -28,7 +23,7 @@ The method consists of three main steps:
 2. Training a sparse attention network to propose candidate triangles based on the edge connectivity of sampled vertices.
 3. Using a classification network to estimate the probability that a candidate triangle will be included in the final mesh.
 
-## Features
+### Features
 
 - Fast and scalable mesh simplification
 - One-pass simplification process
@@ -39,28 +34,22 @@ The method consists of three main steps:
 ## Installation
 
 ```bash
-git clone https://github.com/martinnormark/neural-mesh-simplification.git
-cd neural-mesh-simplification
+conda create -n neural-mesh-simplification python=3.12
+conda activate neural-mesh-simplification
+conda install pip
 pip install -r requirements.txt
+pip install -e .
 ```
 
-## Usage
+## Example Usage
 
-```python
-from neural_mesh_simplifier import NeuralMeshSimplifier
-
-# Initialize the simplifier
-simplifier = NeuralMeshSimplifier()
-
-# Load a mesh
-original_mesh = load_mesh("path/to/your/mesh.obj")
-
-# Simplify the mesh
-simplified_mesh = simplifier.simplify(original_mesh, target_faces=1000)
-
-# Save the simplified mesh
-save_mesh(simplified_mesh, "path/to/simplified_mesh.obj")
+1. Drop your meshes as `.obj` files to the `examples/data` folder
+2. Run the following command
+```bash
+python examples/example.py
 ```
+3. Collect the simplified meshes in `examples/data/simplified`
+
 
 ## Training
 
@@ -92,10 +81,6 @@ If you use this code in your research, please cite the original paper:
     pages     = {18583-18592}
 }
 ```
-
-## Contributing
-
-Contributions are welcome to improve this implementation. Please feel free to submit issues and pull requests.
 
 ## License
 
