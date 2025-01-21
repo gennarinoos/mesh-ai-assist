@@ -1,9 +1,9 @@
 import numpy as np
 import trimesh
-from ..metrics.chamfer_distance import chamfer_distance
-from ..metrics.normal_consistency import normal_consistency
-from ..metrics.edge_preservation import edge_preservation
-from ..metrics.hausdorff_distance import hausdorff_distance
+from neural_mesh_simplification.metrics.chamfer_distance import chamfer_distance
+from neural_mesh_simplification.metrics.normal_consistency import normal_consistency
+from neural_mesh_simplification.metrics.edge_preservation import edge_preservation
+from neural_mesh_simplification.metrics.hausdorff_distance import hausdorff_distance
 
 
 def create_cube_mesh(scale=1.0):
