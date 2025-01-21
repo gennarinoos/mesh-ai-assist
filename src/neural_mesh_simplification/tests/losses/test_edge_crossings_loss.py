@@ -1,6 +1,6 @@
 import torch
 import pytest
-from losses import EdgeCrossingLoss
+from ..losses import EdgeCrossingLoss
 
 
 @pytest.fixture

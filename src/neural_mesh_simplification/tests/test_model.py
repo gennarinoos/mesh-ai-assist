@@ -1,7 +1,7 @@
 import torch
 import pytest
 from torch_geometric.data import Data
-from models import NeuralMeshSimplification
+from ..models import NeuralMeshSimplification
 
 
 @pytest.fixture

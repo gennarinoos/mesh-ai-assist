@@ -1,5 +1,5 @@
 import torch.nn as nn
-from losses import (
+from . import (
     ProbabilisticChamferDistanceLoss,
     ProbabilisticSurfaceDistanceLoss,
     TriangleCollisionLoss,

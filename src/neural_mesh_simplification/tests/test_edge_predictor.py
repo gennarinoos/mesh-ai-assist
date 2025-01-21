@@ -2,8 +2,8 @@ import torch
 import pytest
 import torch.nn as nn
 from torch_geometric.data import Data
-from models.edge_predictor import EdgePredictor
-from models.layers.devconv import DevConv
+from ..models.edge_predictor import EdgePredictor
+from ..models.layers.devconv import DevConv
 
 
 @pytest.fixture

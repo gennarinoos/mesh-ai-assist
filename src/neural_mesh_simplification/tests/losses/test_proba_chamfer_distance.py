@@ -1,6 +1,6 @@
 import torch
 import pytest
-from losses import ProbabilisticChamferDistanceLoss
+from ..losses import ProbabilisticChamferDistanceLoss
 
 
 @pytest.fixture

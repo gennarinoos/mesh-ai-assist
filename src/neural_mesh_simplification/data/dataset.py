@@ -5,7 +5,7 @@ import numpy as np
 from typing import Optional
 from torch.utils.data import Dataset
 from torch_geometric.data import Data
-from utils.mesh_operations import build_graph_from_mesh
+from ..utils.mesh_operations import build_graph_from_mesh
 
 
 class MeshSimplificationDataset(Dataset):

@@ -4,7 +4,7 @@ import sys
 # Add the root directory of your project to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from data.dataset import MeshSimplificationDataset, load_mesh, preprocess_mesh
+from neural_mesh_simplification.data import MeshSimplificationDataset, load_mesh, preprocess_mesh
 import trimesh
 import networkx as nx
 from tqdm import tqdm

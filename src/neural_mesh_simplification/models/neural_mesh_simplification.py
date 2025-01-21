@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch_geometric
 from torch_geometric.data import Data
-from models import PointSampler, EdgePredictor, FaceClassifier
+from ..models import PointSampler, EdgePredictor, FaceClassifier
 
 
 class NeuralMeshSimplification(nn.Module):
