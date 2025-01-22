@@ -2,15 +2,14 @@
 # print(sys.path)
 
 import os
+
 from trimesh.base import Scene, Trimesh
 
 from neural_mesh_simplification import NeuralMeshSimplifier
 from neural_mesh_simplification.data.dataset import load_mesh
-from neural_mesh_simplification.utils import save_mesh
 
 # Initialize the simplifier
 simplifier = NeuralMeshSimplifier()
-
 
 # Load all meshes in the data folder (replace with a path to your .obj file)
 script_dir = os.path.dirname(os.path.abspath(__file__))

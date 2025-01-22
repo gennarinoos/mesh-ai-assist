@@ -1,9 +1,7 @@
 import argparse
-import os
-import torch
-from ..trainer.trainer import Trainer
-from ..utils.mesh_operations import load_mesh, preprocess_mesh
-from ..data.dataset import MeshSimplificationDataset
+
+from neural_mesh_simplification.trainer.trainer import Trainer
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Evaluate the Neural Mesh Simplification model.")
@@ -12,11 +10,13 @@ def parse_args():
     parser.add_argument("--checkpoint", type=str, required=True, help="Path to the model checkpoint.")
     return parser.parse_args()
 
+
 def load_config(config_path):
     import yaml
     with open(config_path, "r") as file:
         config = yaml.safe_load(file)
     return config
+
 
 def main():
     args = parse_args()
@@ -29,6 +29,7 @@ def main():
     evaluation_metrics = trainer.evaluate(trainer.val_loader)
     for metric, value in evaluation_metrics.items():
         print(f"{metric}: {value:.4f}")
+
 
 if __name__ == "__main__":
     main()
