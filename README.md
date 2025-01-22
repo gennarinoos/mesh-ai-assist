@@ -2,26 +2,33 @@
 
 A collection of AI tools to work with 3D Meshes.
 
-* Neural Mesh Simplification
+1. Neural Mesh Simplification
 
 ---
 
-## Neural Mesh Simplification
+## 1. Neural Mesh Simplification
 
-From the paper "Neural Mesh Simplification" by Potamias et al. (CVPR 2022), this Python package provides a fast, learnable method for mesh simplification that generates simplified meshes in real-time.
+Implementation of the
+paper [Neural Mesh Simplification paper](https://openaccess.thecvf.com/content/CVPR2022/papers/Potamias_Neural_Mesh_Simplification_CVPR_2022_paper.pdf)
+by Potamias et al. (CVPR 2022) and the updated info shared
+in [supplementary material](https://openaccess.thecvf.com/content/CVPR2022/supplemental/Potamias_Neural_Mesh_Simplification_CVPR_2022_supplemental.pdf).
 
-Research, methodology introduced in the [Neural Mesh Simplification paper](https://openaccess.thecvf.com/content/CVPR2022/papers/Potamias_Neural_Mesh_Simplification_CVPR_2022_paper.pdf), with the updated info shared in [supplementary material](https://openaccess.thecvf.com/content/CVPR2022/supplemental/Potamias_Neural_Mesh_Simplification_CVPR_2022_supplemental.pdf).
-
+This Python package provides a fast, learnable method for mesh simplification that generates simplified meshes in
+real-time.
 
 ### Overview
 
-Neural Mesh Simplification is a novel approach to reduce the resolution of 3D meshes while preserving their appearance. Unlike traditional simplification methods that collapse edges in a greedy iterative manner, this method simplifies a given mesh in one pass using deep learning techniques.
+Neural Mesh Simplification is a novel approach to reduce the resolution of 3D meshes while preserving their appearance.
+Unlike traditional simplification methods that collapse edges in a greedy iterative manner, this method simplifies a
+given mesh in one pass using deep learning techniques.
 
 The method consists of three main steps:
 
 1. Sampling a subset of input vertices using a sophisticated extension of random sampling.
-2. Training a sparse attention network to propose candidate triangles based on the edge connectivity of sampled vertices.
-3. Using a classification network to estimate the probability that a candidate triangle will be included in the final mesh.
+2. Training a sparse attention network to propose candidate triangles based on the edge connectivity of sampled
+   vertices.
+3. Using a classification network to estimate the probability that a candidate triangle will be included in the final
+   mesh.
 
 ### Features
 
@@ -31,7 +38,7 @@ The method consists of three main steps:
 - Lightweight and differentiable implementation
 - Suitable for integration into learnable pipelines
 
-## Installation
+### Installation
 
 ```bash
 conda create -n neural-mesh-simplification python=3.12
@@ -41,33 +48,61 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-## Example Usage
+### Example Usage / Playground
 
 1. Drop your meshes as `.obj` files to the `examples/data` folder
 2. Run the following command
+
 ```bash
 python examples/example.py
 ```
+
 3. Collect the simplified meshes in `examples/data/simplified`
 
+### Data Preparation
 
-## Training
+If you don't have a dataset for training and evaluation, you can use a collection from HuggingFace's 3D Meshes dataset.
+See https://huggingface.co/datasets/perler/ppsurf for more information.
 
-To train the model on your own dataset:
+Run the following script to use the HuggingFace API to download
 
 ```bash
-python ./scripts/train.py --data_path /path/to/your/dataset --epochs 100 --batch_size 32
+python scripts/download_test_meshes.py
 ```
 
-## Evaluation
+Data will be downloaded in the `data/raw` folder at the root of the project.
+You can use `--target-folder` to specify a different folder.
+
+Once you have some data, you should preprocess it using the following script:
+
+```bash
+python scripts/preprocess.py
+```
+
+You can use the `--data_path` argument to specify the path to the dataset. The script will create a `data/processed`
+
+### Training
+
+To train the model on your own dataset with the prepared data:
+
+```bash
+python ./scripts/train.py --data_path data/processed --config scripts/train_config.yml
+```
+
+Specify a different `--data_path` if you have your data in a different location.
+You can use the default training config at `scripts/train_config.yml` or specify a different one with `--config_path`.
+You can also override the checkpoint directory (where the model will be saved) with `--checkpoint_dir`.
+If the training was interrupted, you can resume it by specifying the path to the checkpoint with `--resume`.
+
+### Evaluation
 
 To evaluate the model on a test set:
 
 ```bash
-python ./scripts/evaluate.py --model_path /path/to/saved/model --test_data /path/to/test/set
+python ./scripts/evaluate.py  --config scripts/train_config.yml --eval_data_path /path/to/test/set
 ```
 
-## Citation
+### Citation
 
 If you use this code in your research, please cite the original paper:
 

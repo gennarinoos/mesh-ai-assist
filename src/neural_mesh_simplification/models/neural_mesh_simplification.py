@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch_geometric
 from torch_geometric.data import Data
+
 from ..models import PointSampler, EdgePredictor, FaceClassifier
 
 
@@ -123,8 +124,8 @@ class NeuralMeshSimplification(nn.Module):
 
                         # Calculate triangle probability
                         prob = (
-                            adj_matrix[i, n1] * adj_matrix[i, n2] * adj_matrix[n1, n2]
-                        ) ** (1 / 3)
+                                       adj_matrix[i, n1] * adj_matrix[i, n2] * adj_matrix[n1, n2]
+                               ) ** (1 / 3)
                         triangle_probs.append(prob)
 
         if triangles:

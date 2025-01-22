@@ -1,11 +1,47 @@
 import numpy as np
 import trimesh
+from trimesh import Trimesh
 
 from neural_mesh_simplification.metrics.chamfer_distance import chamfer_distance
 from neural_mesh_simplification.metrics.edge_preservation import edge_preservation
 from neural_mesh_simplification.metrics.hausdorff_distance import hausdorff_distance
 from neural_mesh_simplification.metrics.normal_consistency import normal_consistency
-from neural_mesh_simplification.utils import create_cube_mesh
+
+
+def create_cube_mesh(scale=1.0):
+    vertices = (
+            np.array(
+                [
+                    [0, 0, 0],
+                    [1, 0, 0],
+                    [1, 1, 0],
+                    [0, 1, 0],
+                    [0, 0, 1],
+                    [1, 0, 1],
+                    [1, 1, 1],
+                    [0, 1, 1],
+                ]
+            )
+            * scale
+    )
+    faces = np.array(
+        [
+            [0, 1, 2],
+            [0, 2, 3],
+            [4, 5, 6],
+            [4, 6, 7],
+            [0, 1, 5],
+            [0, 5, 4],
+            [2, 3, 7],
+            [2, 7, 6],
+            [1, 2, 6],
+            [1, 6, 5],
+            [0, 3, 7],
+            [0, 7, 4],
+        ]
+    )
+
+    return Trimesh(vertices=vertices, faces=faces)
 
 
 def test_chamfer_distance_identical_meshes():

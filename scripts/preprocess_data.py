@@ -73,4 +73,9 @@ def preprocess_dataset(
 
 
 if __name__ == "__main__":
+    if not os.path.exists("data/raw"):
+        raise FileNotFoundError("The 'data/raw' directory does not exist. Please download the dataset first.")
+    if not os.path.exists("data/processed"):
+        os.makedirs("data/processed")
+
     preprocess_dataset("data/raw", "data/processed")

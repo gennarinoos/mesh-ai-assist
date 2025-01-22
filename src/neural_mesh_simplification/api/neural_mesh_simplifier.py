@@ -2,7 +2,7 @@ import torch
 import trimesh
 from torch_geometric.data import Data
 
-from ..data.dataset import mesh_to_tensor, preprocess_mesh
+from ..data.dataset import preprocess_mesh, mesh_to_tensor
 from ..models import NeuralMeshSimplification
 
 
@@ -38,9 +38,9 @@ class NeuralMeshSimplifier:
         # Simplify the mesh
         print("Simplifying the mesh...")
         with torch.no_grad():
-            simplified_vertices = self.model(vertices)  # Model should output simplified vertices
+            simplified_vertices = self.model(vertices)
 
-        simplified_vertices = simplified_vertices.squeeze(0).cpu().numpy()  # Shape: [N', 3]
+        simplified_vertices = simplified_vertices.squeeze(0).cpu().numpy()
 
         return trimesh.Trimesh(vertices=simplified_vertices)
 
