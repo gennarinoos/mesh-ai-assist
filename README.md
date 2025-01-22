@@ -91,7 +91,8 @@ python ./scripts/train.py --data_path data/processed --config scripts/train_conf
 
 Specify a different `--data_path` if you have your data in a different location.
 You can use the default training config at `scripts/train_config.yml` or specify a different one with `--config_path`.
-You can also override the checkpoint directory (where the model will be saved) with `--checkpoint_dir`.
+You can also override the checkpoint directory specified in the config file (where the model will be saved) with
+`--checkpoint_dir`.
 If the training was interrupted, you can resume it by specifying the path to the checkpoint with `--resume`.
 
 ### Evaluation
@@ -99,8 +100,18 @@ If the training was interrupted, you can resume it by specifying the path to the
 To evaluate the model on a test set:
 
 ```bash
-python ./scripts/evaluate.py  --config scripts/train_config.yml --eval_data_path /path/to/test/set
+python ./scripts/evaluate.py --config scripts/train_config.yml --eval_data_path /path/to/test/set
 ```
+
+### Inference
+
+To simplify a mesh using the trained model:
+
+```bash
+python ./scripts/inference.py --input-file /path/to/your/mesh.obj --output-file /path/to/output.obj --model-checkpoint /path/to/checkpoint.pth --device cpu
+```
+
+If you have a CUDA-compatible GPU, you can specify `--device cuda` to use it for inference.
 
 ### Citation
 
