@@ -8,7 +8,7 @@ from trimesh import Scene, Trimesh
 
 from neural_mesh_simplification import NeuralMeshSimplifier
 from neural_mesh_simplification.data.dataset import load_mesh
-from tests.test_metrics import create_cube_mesh
+from neural_mesh_simplification.utils import create_cube_mesh
 
 
 def save_simplified_mesh(mesh: trimesh.Geometry, file_name: str):
@@ -61,7 +61,7 @@ for file_name in mesh_files:
 
     elif isinstance(original_mesh, Scene):
         continue
-        
+
         # Iterate through the original mesh geometry
         for name, geom in original_mesh.geometry.items():
             print("Original: ", geom)
