@@ -18,8 +18,7 @@ def save_simplified_mesh(mesh: trimesh.Geometry, file_name: str):
     Save the simplified mesh to file in the simplified folder.
     """
     simplified_dir = os.path.join(data_dir, "simplified")
-    if not os.path.exists(simplified_dir):
-        os.makedirs(simplified_dir)
+    os.makedirs(simplified_dir, exist_ok=True)
     output_path = os.path.join(simplified_dir, f"simplified_{file_name}")
     mesh.export(output_path)
 
@@ -27,34 +26,31 @@ def save_simplified_mesh(mesh: trimesh.Geometry, file_name: str):
 
 
 def cubeExample():
+    print(f"Creating cube mesh")
     file = "cube.obj"
     mesh = trimesh.creation.box(extents=[2, 2, 2])
-    output_path = os.path.join(data_dir, file)
-    mesh.export(output_path)
     simplified_mesh = simplifier.simplify(mesh)
     save_simplified_mesh(simplified_mesh, file)
 
 
 def sphereExample():
+    print(f"Creating sphere mesh")
     file = "sphere.obj"
     mesh = trimesh.creation.icosphere(subdivisions=2, radius=2)
-    output_path = os.path.join(data_dir, file)
-    mesh.export(output_path)
     simplified_mesh = simplifier.simplify(mesh)
     save_simplified_mesh(simplified_mesh, file)
 
 
 def cylinderExample():
+    print(f"Creating cylinder mesh")
     file = "cylinder.obj"
     mesh = trimesh.creation.cylinder(radius=1, height=2)
-    output_path = os.path.join(data_dir, file)
-    mesh.export(output_path)
     simplified_mesh = simplifier.simplify(mesh)
     save_simplified_mesh(simplified_mesh, file)
 
 
 def meshDropboxExample():
-    # Load all meshes in the data folder (replace with a path to your .obj file)
+    print(f"Loading all meshes of type '.obj' in folder '{data_dir}'")
     mesh_files = [f for f in os.listdir(data_dir) if f.endswith('.obj')]
 
     for file_name in mesh_files:
