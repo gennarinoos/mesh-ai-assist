@@ -64,17 +64,22 @@ class EdgePredictor(nn.Module):
 
         # Remap node indices to ensure they are within the correct range
         row, col = edge_index
-        row_offset = row.min()
-        col_offset = col.min()
-        row = row - row_offset
-        col = col - col_offset
+        # row_offset = row.min()
+        # col_offset = col.min()
+        # row = row - row_offset
+        # col = col - col_offset
+
+        # print("D: edge_index", edge_index)
+        # print("D: attention scores", attention_scores)
+        # print("D: sparse_sizes", num_nodes - row_offset, num_nodes - col_offset)
 
         # Create sparse attention matrix
         S = SparseTensor(
             row=row,
             col=col,
             value=attention_scores,
-            sparse_sizes=(num_nodes - row_offset, num_nodes - col_offset),
+            # sparse_sizes=(num_nodes - row_offset, num_nodes - col_offset),
+            sparse_sizes=(num_nodes, num_nodes)
         )
 
         # Create original adjacency matrix
@@ -82,14 +87,22 @@ class EdgePredictor(nn.Module):
             row=row,
             col=col,
             value=torch.ones(edge_index.size(1), device=edge_index.device),
-            sparse_sizes=(num_nodes - row_offset, num_nodes - col_offset),
+            # sparse_sizes=(num_nodes - row_offset, num_nodes - col_offset),
+            sparse_sizes=(num_nodes, num_nodes)
         )
+
+        # Pretty print the SparseTensor object as a matrix
+        # print("D: A", A.sizes(), "\n", A.to_dense())
+        # print("D: S", S.sizes(), "\n", S.to_dense())
+        # print("D: S.t()", S.t().sizes(), "\n", S.to_dense().t())
 
         # Compute A_s = S * A * S^T
         A_s = S @ A @ S.t()
 
         # Convert to COO format
         row, col, value = A_s.coo()
-        indices = torch.stack([row + row_offset, col + col_offset], dim=0)
+
+        # indices = torch.stack([row + row_offset, col + col_offset], dim=0)
+        indices = torch.stack([row, col], dim=0)
 
         return indices, value

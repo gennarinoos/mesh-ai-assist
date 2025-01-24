@@ -20,14 +20,9 @@ class NeuralMeshSimplification(nn.Module):
         x, edge_index = data.x, data.edge_index
         num_nodes = x.size(0)
 
-        # Sample points
-        sampled_probs = self.point_sampler(x, edge_index)
-        num_samples = min(max(int(0.5 * num_nodes), 1), num_nodes - 1)
-        sampled_indices = torch.multinomial(
-            sampled_probs, num_samples=num_samples, replacement=False
-        )
-        sampled_indices = torch.clamp(sampled_indices, 0, num_nodes - 1)
-        sampled_indices = torch.unique(sampled_indices)
+        # Uncomment this line to avoid point sampling
+        # sampled_indices, sampled_probs = torch.arange(0, num_nodes), torch.ones(num_nodes)
+        sampled_indices, sampled_probs = self.sample_points(data)
 
         sampled_x = x[sampled_indices]
         sampled_pos = (
@@ -68,7 +63,7 @@ class NeuralMeshSimplification(nn.Module):
                 (0, 3), dtype=torch.long, device=data.x.device
             )
         else:
-            simplified_faces = candidate_triangles[face_probs > 0.5]
+            simplified_faces = candidate_triangles[triangle_probs > 0.5]
 
         return {
             "sampled_indices": sampled_indices,
@@ -81,6 +76,21 @@ class NeuralMeshSimplification(nn.Module):
             "face_probs": face_probs,
             "simplified_faces": simplified_faces,
         }
+
+    def sample_points(self, data: Data):
+        x, edge_index = data.x, data.edge_index
+        num_nodes = x.size(0)
+
+        # Sample points
+        sampled_probs = self.point_sampler(x, edge_index)
+        num_samples = min(max(int(0.5 * num_nodes), 1), num_nodes - 1)
+        sampled_indices = torch.multinomial(
+            sampled_probs, num_samples=num_samples, replacement=False
+        )
+        sampled_indices = torch.clamp(sampled_indices, 0, num_nodes - 1)
+        sampled_indices = torch.unique(sampled_indices)
+
+        return sampled_indices, sampled_probs
 
     def generate_candidate_triangles(self, edge_index, edge_probs):
         device = edge_index.device
