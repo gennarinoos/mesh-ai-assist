@@ -13,43 +13,46 @@ data_dir = os.path.join(script_dir, "data")
 simplifier = NeuralMeshSimplifier()
 
 
-def save_simplified_mesh(mesh: trimesh.Geometry, file_name: str):
+def save_mesh_to_file(mesh: trimesh.Geometry, file_name: str):
     """
     Save the simplified mesh to file in the simplified folder.
     """
-    simplified_dir = os.path.join(data_dir, "simplified")
+    simplified_dir = os.path.join(data_dir, "processed")
     os.makedirs(simplified_dir, exist_ok=True)
-    output_path = os.path.join(simplified_dir, f"simplified_{file_name}")
+    output_path = os.path.join(simplified_dir, file_name)
     mesh.export(output_path)
 
-    print(f"Simplified mesh saved to: {output_path}")
+    print(f"Mesh saved to: {output_path}")
 
 
-def cubeExample():
+def cube_example():
     print(f"Creating cube mesh")
     file = "cube.obj"
     mesh = trimesh.creation.box(extents=[2, 2, 2])
     simplified_mesh = simplifier.simplify(mesh)
-    save_simplified_mesh(simplified_mesh, file)
+    save_mesh_to_file(mesh, file)
+    save_mesh_to_file(simplified_mesh, f"simplified_{file}")
 
 
-def sphereExample():
+def sphere_example():
     print(f"Creating sphere mesh")
     file = "sphere.obj"
     mesh = trimesh.creation.icosphere(subdivisions=2, radius=2)
     simplified_mesh = simplifier.simplify(mesh)
-    save_simplified_mesh(simplified_mesh, file)
+    save_mesh_to_file(mesh, file)
+    save_mesh_to_file(simplified_mesh, f"simplified_{file}")
 
 
-def cylinderExample():
+def cylinder_example():
     print(f"Creating cylinder mesh")
     file = "cylinder.obj"
     mesh = trimesh.creation.cylinder(radius=1, height=2)
     simplified_mesh = simplifier.simplify(mesh)
-    save_simplified_mesh(simplified_mesh, file)
+    save_mesh_to_file(mesh, file)
+    save_mesh_to_file(simplified_mesh, f"simplified_{file}")
 
 
-def meshDropboxExample():
+def mesh_dropbox_example():
     print(f"Loading all meshes of type '.obj' in folder '{data_dir}'")
     mesh_files = [f for f in os.listdir(data_dir) if f.endswith('.obj')]
 
@@ -84,14 +87,14 @@ def meshDropboxExample():
             raise ValueError("Invalid mesh type (expected Trimesh or Scene):", type(original_mesh))
 
         # Save the simplified mesh to file
-        save_simplified_mesh(simplified_scene, file_name)
+        save_mesh_to_file(simplified_scene, f"simplified_{file_name}")
 
 
 def main():
-    cubeExample()
-    # sphereExample()
-    # cylinderExample()
-    # meshDropboxExample()
+    # cube_example()
+    # sphere_example()
+    # cylinder_example()
+    mesh_dropbox_example()
 
 
 if __name__ == "__main__":

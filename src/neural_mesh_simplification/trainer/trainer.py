@@ -1,16 +1,17 @@
-import os
-import torch
 import logging
-from torch.utils.data import DataLoader, random_split
+import os
+from typing import Dict, Any
+
+import torch
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch_geometric.data import Data
+from torch.utils.data import DataLoader, random_split
 from torch_geometric.loader import DataLoader
-from typing import Dict, Any, Optional
-from ..models import NeuralMeshSimplification
+
 from ..data import MeshSimplificationDataset
 from ..losses import CombinedMeshSimplificationLoss
 from ..metrics import chamfer_distance, normal_consistency, edge_preservation, hausdorff_distance
+from ..models import NeuralMeshSimplification
 
 
 class Trainer:
@@ -82,7 +83,8 @@ class Trainer:
             loss.backward()
             self.optimizer.step()
             running_loss += loss.item()
-        logging.info(f"Epoch [{epoch + 1}/{self.config['training']['num_epochs']}], Loss: {running_loss / len(self.train_loader)}")
+        logging.info(
+            f"Epoch [{epoch + 1}/{self.config['training']['num_epochs']}], Loss: {running_loss / len(self.train_loader)}")
 
     def _validate(self, epoch: int) -> float:
         self.model.eval()
@@ -134,7 +136,8 @@ class Trainer:
 
     def evaluate(self, data_loader: DataLoader) -> Dict[str, float]:
         self.model.eval()
-        metrics = {"chamfer_distance": 0.0, "normal_consistency": 0.0, "edge_preservation": 0.0, "hausdorff_distance": 0.0}
+        metrics = {"chamfer_distance": 0.0, "normal_consistency": 0.0, "edge_preservation": 0.0,
+                   "hausdorff_distance": 0.0}
         with torch.no_grad():
             for batch in data_loader:
                 batch = batch.to(self.device)

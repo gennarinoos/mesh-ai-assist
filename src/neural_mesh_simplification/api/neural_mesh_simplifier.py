@@ -76,6 +76,6 @@ class NeuralMeshSimplifier:
         return trimesh.Trimesh(vertices=vertices, faces=faces, edges=edges)
 
     def simplify(self, mesh: trimesh.Trimesh) -> trimesh.Trimesh:
-        # return self._dummy_simplify()
         # return self._simplify_1(mesh)
         return self._simplify_2(mesh)
+        # return self._dummy_simplify()
