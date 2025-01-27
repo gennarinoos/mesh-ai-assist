@@ -86,7 +86,7 @@ You can use the `--data_path` argument to specify the path to the dataset. The s
 To train the model on your own dataset with the prepared data:
 
 ```bash
-python ./scripts/train.py --data_path data/processed --config scripts/train_config.yml
+python ./scripts/train.py --data_path data/processed --config configs/default.yaml
 ```
 
 Specify a different `--data_path` if you have your data in a different location.
@@ -100,7 +100,7 @@ If the training was interrupted, you can resume it by specifying the path to the
 To evaluate the model on a test set:
 
 ```bash
-python ./scripts/evaluate.py --config scripts/train_config.yml --eval_data_path /path/to/test/set --checkpoint /path/to/checkpoint.pth
+python ./scripts/evaluate.py --config configs/default.yaml --eval_data_path /path/to/test/set --checkpoint /path/to/checkpoint.pth
 ```
 
 ### Inference

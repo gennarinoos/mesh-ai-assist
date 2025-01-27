@@ -9,7 +9,7 @@ from neural_mesh_simplification.data.dataset import load_mesh
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, "data")
 script_dir = os.path.dirname(os.path.abspath(__file__))
-train_config = os.path.join(script_dir, "../scripts/train_config.yml")
+train_config = os.path.join(script_dir, "../configs/default.yaml")
 
 
 def load_config(config_path):
