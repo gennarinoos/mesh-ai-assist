@@ -7,7 +7,7 @@ from ..models import PointSampler, EdgePredictor, FaceClassifier
 
 
 class NeuralMeshSimplification(nn.Module):
-    def __init__(self, input_dim, hidden_dim, num_layers, k, edge_k=None):
+    def __init__(self, input_dim, hidden_dim, num_layers, k, edge_k=None, target_ratio=0.5):
         super(NeuralMeshSimplification, self).__init__()
         self.point_sampler = PointSampler(input_dim, hidden_dim)
         self.edge_predictor = EdgePredictor(
@@ -15,6 +15,7 @@ class NeuralMeshSimplification(nn.Module):
         )
         self.face_classifier = FaceClassifier(input_dim, hidden_dim, num_layers, k)
         self.k = k
+        self.target_ratio = target_ratio
 
     def forward(self, data: Data):
         x, edge_index = data.x, data.edge_index
@@ -83,12 +84,19 @@ class NeuralMeshSimplification(nn.Module):
 
         # Sample points
         sampled_probs = self.point_sampler(x, edge_index)
-        num_samples = min(max(int(0.5 * num_nodes), 1), num_nodes - 1)
+        num_samples = min(
+            max(int(self.target_ratio * num_nodes), 1),
+            num_nodes,
+        )
         sampled_indices = torch.multinomial(
             sampled_probs, num_samples=num_samples, replacement=False
         )
         sampled_indices = torch.clamp(sampled_indices, 0, num_nodes - 1)
         sampled_indices = torch.unique(sampled_indices)
+        
+        print(
+            f"Simplification ratio: {num_samples / num_nodes:.2f} (Target: {self.target_ratio})"
+        )
 
         return sampled_indices, sampled_probs
 

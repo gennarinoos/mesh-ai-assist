@@ -7,12 +7,13 @@ from ..models import NeuralMeshSimplification
 
 
 class NeuralMeshSimplifier:
-    def __init__(self, input_dim, hidden_dim, num_layers, k, edge_k=None):
+    def __init__(self, input_dim, hidden_dim, num_layers, k, edge_k=None, target_ratio=0.5):
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.num_layers = num_layers
         self.k = k
         self.edge_k = edge_k
+        self.target_ratio = target_ratio
         self.model = self._build_model()
 
     @classmethod
@@ -27,7 +28,8 @@ class NeuralMeshSimplifier:
             hidden_dim=self.hidden_dim,
             num_layers=self.num_layers,
             k=self.k,
-            edge_k=self.edge_k
+            edge_k=self.edge_k,
+            target_ratio=self.target_ratio
         )
 
     def _load_model(self, checkpoint_path: str, map_location: str):
