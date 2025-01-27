@@ -102,9 +102,11 @@ def main():
     simplifier = NeuralMeshSimplifier(
         input_dim=config["model"]["input_dim"],
         hidden_dim=config["model"]["hidden_dim"],
+        edge_hidden_dim=config["model"]["edge_hidden_dim"],
         num_layers=config["model"]["num_layers"],
         k=config["model"]["k"],
-        edge_k=config["model"]["edge_k"]
+        edge_k=config["model"]["edge_k"],
+        target_ratio=config["model"]["target_ratio"]
     )
 
     # cube_example(simplifier)

@@ -10,8 +10,10 @@ from neural_mesh_simplification.data.dataset import load_mesh
 def parse_args():
     parser = argparse.ArgumentParser(description="Simplify a 3D mesh using a trained model.")
     parser.add_argument('--input-file', type=str, required=True, help="Path to the input `.obj` file.")
-    parser.add_argument('--hidden-dim', type=int, required=False, default=256,
-                        help="Number of dimensions/features used by the model")
+    parser.add_argument('--hidden-dim', type=int, required=False, default=128,
+                        help="Feature dimension for point sampler and face classifier")
+    parser.add_argument('--edge-hidden-dim', type=int, required=False, default=64,
+                        help="Feature dimension for edge predictor")
     parser.add_argument('--model-checkpoint', type=str, required=True, help="Path to the trained model checkpoint.")
     parser.add_argument('--device', type=str, default='cpu', help="Device to use for inference (`cpu` or `cuda`).")
 
@@ -22,6 +24,7 @@ def simplify_mesh(
         input_file: str,
         model_checkpoint: str,
         hidden_dim: int,
+        edge_hidden_dim: int,
         device='cpu'
 ):
     """
@@ -30,7 +33,8 @@ def simplify_mesh(
     Args:
         input_file (str): Path to the high-resolution input `.obj` file.
         model_checkpoint (str): Path to the trained model checkpoint.
-        hidden_dim (int): Number of dimensions/features used by the model
+        hidden_dim (int): Feature dimension for point sampler and face classifier
+        edge_hidden_dim (int): Feature dimension for edge predictor
         device (str): Device to use for inference (`cpu` or `cuda`).
     """
     # Load the trained model
@@ -38,6 +42,7 @@ def simplify_mesh(
     simplifier = NeuralMeshSimplifier.using_model(
         model_checkpoint,
         hidden_dim=hidden_dim,
+        edge_hidden_dim=edge_hidden_dim,
         map_location=device
     )
     simplifier.model.to(device)
@@ -77,10 +82,10 @@ def main():
         input_file=args.input_file,
         model_checkpoint=args.model_checkpoint,
         hidden_dim=args.hidden_dim,
+        edge_hidden_dim=args.edge_hidden_dim,
         device=args.device
     )
 
 
 if __name__ == "__main__":
     main()
-

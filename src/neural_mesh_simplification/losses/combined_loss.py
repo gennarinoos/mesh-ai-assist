@@ -24,26 +24,20 @@ class CombinedMeshSimplificationLoss(nn.Module):
         self.lambda_o = lambda_o
 
     def forward(self, original_data, simplified_data):
-        original_x = original_data["pos"] if "pos" in original_data else original_data["x"]
-        original_face = original_data["face"]
-        sampled_indices = simplified_data["sampled_indices"]
-        sampled_vertices = simplified_data["sampled_vertices"]
-        sampled_probs = simplified_data["sampled_probs"][sampled_indices]
-
         chamfer_loss = self.prob_chamfer_loss(
             original_data["pos"],
             simplified_data["sampled_vertices"],
             simplified_data["sampled_probs"],
         )
         surface_loss = self.prob_surface_loss(
-            original_x,
-            original_face,
-            sampled_vertices,
+            original_data["pos"],
+            original_data["face"],
+            simplified_data["sampled_vertices"],
             simplified_data["simplified_faces"],
             simplified_data["face_probs"],
         )
         collision_loss = self.collision_loss(
-            sampled_vertices,
+            simplified_data["sampled_vertices"],
             simplified_data["simplified_faces"],
             simplified_data["face_probs"],
         )

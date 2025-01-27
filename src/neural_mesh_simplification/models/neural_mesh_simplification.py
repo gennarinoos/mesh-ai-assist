@@ -7,11 +7,22 @@ from ..models import PointSampler, EdgePredictor, FaceClassifier
 
 
 class NeuralMeshSimplification(nn.Module):
-    def __init__(self, input_dim, hidden_dim, num_layers, k, edge_k=None, target_ratio=0.5):
+    def __init__(
+            self,
+            input_dim,
+            hidden_dim,
+            edge_hidden_dim,  # Separate hidden dim for edge predictor
+            num_layers=3,
+            k=5,
+            edge_k=15,
+            target_ratio=0.5
+    ):
         super(NeuralMeshSimplification, self).__init__()
         self.point_sampler = PointSampler(input_dim, hidden_dim)
         self.edge_predictor = EdgePredictor(
-            input_dim, hidden_dim, k=edge_k if edge_k is not None else k
+            input_dim,
+            hidden_channels=edge_hidden_dim,
+            k=edge_k,
         )
         self.face_classifier = FaceClassifier(input_dim, hidden_dim, num_layers, k)
         self.k = k

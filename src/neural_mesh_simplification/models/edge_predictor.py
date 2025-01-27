@@ -8,7 +8,7 @@ from .layers.devconv import DevConv
 
 
 class EdgePredictor(nn.Module):
-    def __init__(self, in_channels, hidden_channels=64, k=15):
+    def __init__(self, in_channels, hidden_channels, k):
         super(EdgePredictor, self).__init__()
         self.k = k
         self.devconv = DevConv(in_channels, hidden_channels)
