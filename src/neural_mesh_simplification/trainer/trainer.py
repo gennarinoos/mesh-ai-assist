@@ -108,13 +108,12 @@ class Trainer:
     def _train_one_epoch(self, epoch: int):
         self.model.train()
         running_loss = 0.0
-        logger.info(f"Starting epoch {epoch + 1}")
+        logger.debug(f"Starting epoch {epoch + 1}")
         for batch_idx, batch in enumerate(self.train_loader):
-            logger.info(f"Processing batch {batch_idx + 1}")
+            logger.debug(f"Processing batch {batch_idx + 1}")
             try:
                 self.optimizer.zero_grad()
                 batch = batch.to(self.device)
-                logger.debug(f"Batch data keys: {batch.keys()}")
                 output = self.model(batch)
                 loss = self.criterion(batch, output)
                 loss.backward()

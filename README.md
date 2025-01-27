@@ -57,7 +57,8 @@ pip install -e .
 python examples/example.py
 ```
 
-3. Collect the simplified meshes in `examples/data/simplified`
+3. Collect the simplified meshes in `examples/data`. The simplified mesh objects file name will be the ones prefixed
+   with `simplified_`.
 
 ### Data Preparation
 

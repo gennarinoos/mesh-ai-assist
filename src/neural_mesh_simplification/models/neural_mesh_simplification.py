@@ -120,10 +120,6 @@ class NeuralMeshSimplification(nn.Module):
         sampled_indices = torch.clamp(sampled_indices, 0, num_nodes - 1)
         sampled_indices = torch.unique(sampled_indices)
 
-        print(
-            f"Simplification ratio: {num_samples / num_nodes:.2f} (Target: {self.target_ratio})"
-        )
-
         return sampled_indices, sampled_probs
 
     def generate_candidate_triangles(self, edge_index, edge_probs):
