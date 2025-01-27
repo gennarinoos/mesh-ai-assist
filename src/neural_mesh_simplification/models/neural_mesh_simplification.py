@@ -7,27 +7,37 @@ from ..models import PointSampler, EdgePredictor, FaceClassifier
 
 
 class NeuralMeshSimplification(nn.Module):
-    def __init__(self, input_dim, hidden_dim, num_layers=3, k=20, edge_k=None):
+    def __init__(
+            self,
+            input_dim,
+            hidden_dim,
+            edge_hidden_dim,  # Separate hidden dim for edge predictor
+            num_layers=3,
+            k=5,
+            edge_k=15,
+            target_ratio=0.5
+    ):
         super(NeuralMeshSimplification, self).__init__()
         self.point_sampler = PointSampler(input_dim, hidden_dim)
         self.edge_predictor = EdgePredictor(
-            input_dim, hidden_dim, k=edge_k if edge_k is not None else k
+            input_dim,
+            hidden_channels=edge_hidden_dim,
+            k=edge_k,
         )
         self.face_classifier = FaceClassifier(input_dim, hidden_dim, num_layers, k)
         self.k = k
+        self.target_ratio = target_ratio
 
     def forward(self, data: Data):
         x, edge_index = data.x, data.edge_index
         num_nodes = x.size(0)
 
-        # Sample points
-        sampled_probs = self.point_sampler(x, edge_index)
-        num_samples = min(max(int(0.5 * num_nodes), 1), num_nodes - 1)
-        sampled_indices = torch.multinomial(
-            sampled_probs, num_samples=num_samples, replacement=False
-        )
-        sampled_indices = torch.clamp(sampled_indices, 0, num_nodes - 1)
-        sampled_indices = torch.unique(sampled_indices)
+        # Uncomment this line to avoid point sampling
+        # sampled_indices, sampled_probs = torch.arange(0, num_nodes), torch.ones(num_nodes)
+        sampled_indices, sampled_probs = self.sample_points(data)
+
+        # Get probabilities for sampled vertices
+        sampled_vertex_probs = sampled_probs[sampled_indices]
 
         sampled_x = x[sampled_indices]
         sampled_pos = (
@@ -36,11 +46,7 @@ class NeuralMeshSimplification(nn.Module):
             else sampled_x
         )
 
-        sampled_vertices = (
-            data.pos[sampled_indices]
-            if hasattr(data, "pos") and data.pos is not None
-            else sampled_x
-        )
+        sampled_vertices = sampled_pos  # Use sampled_pos directly as vertices
 
         # Update edge_index to reflect the new indices
         sampled_edge_index, _ = torch_geometric.utils.subgraph(
@@ -57,9 +63,25 @@ class NeuralMeshSimplification(nn.Module):
 
         # Classify faces
         if candidate_triangles.shape[0] > 0:
-            face_probs = self.face_classifier(sampled_x, sampled_pos, batch=None)
-            # Ensure face_probs matches the number of candidate triangles
-            face_probs = face_probs[: candidate_triangles.shape[0]]
+            # Create triangle features by averaging vertex features
+            triangle_features = torch.zeros(
+                (candidate_triangles.shape[0], sampled_x.shape[1]),
+                device=sampled_x.device,
+            )
+            for i in range(3):
+                triangle_features += sampled_x[candidate_triangles[:, i]]
+            triangle_features /= 3
+            # Calculate triangle centers
+            triangle_centers = torch.zeros(
+                (candidate_triangles.shape[0], sampled_pos.shape[1]),
+                device=sampled_pos.device,
+            )
+            for i in range(3):
+                triangle_centers += sampled_pos[candidate_triangles[:, i]]
+            triangle_centers /= 3
+            face_probs = self.face_classifier(
+                triangle_features, triangle_centers, batch=None
+            )
         else:
             face_probs = torch.empty(0, device=data.x.device)
 
@@ -68,11 +90,11 @@ class NeuralMeshSimplification(nn.Module):
                 (0, 3), dtype=torch.long, device=data.x.device
             )
         else:
-            simplified_faces = candidate_triangles[face_probs > 0.5]
+            simplified_faces = candidate_triangles[triangle_probs > 0.5]
 
         return {
             "sampled_indices": sampled_indices,
-            "sampled_probs": sampled_probs,
+            "sampled_probs": sampled_vertex_probs,
             "sampled_vertices": sampled_vertices,
             "edge_index": edge_index_pred,
             "edge_probs": edge_probs,
@@ -81,6 +103,24 @@ class NeuralMeshSimplification(nn.Module):
             "face_probs": face_probs,
             "simplified_faces": simplified_faces,
         }
+
+    def sample_points(self, data: Data):
+        x, edge_index = data.x, data.edge_index
+        num_nodes = x.size(0)
+
+        # Sample points
+        sampled_probs = self.point_sampler(x, edge_index)
+        num_samples = min(
+            max(int(self.target_ratio * num_nodes), 1),
+            num_nodes,
+        )
+        sampled_indices = torch.multinomial(
+            sampled_probs, num_samples=num_samples, replacement=False
+        )
+        sampled_indices = torch.clamp(sampled_indices, 0, num_nodes - 1)
+        sampled_indices = torch.unique(sampled_indices)
+
+        return sampled_indices, sampled_probs
 
     def generate_candidate_triangles(self, edge_index, edge_probs):
         device = edge_index.device

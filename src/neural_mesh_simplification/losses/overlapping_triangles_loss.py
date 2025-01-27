@@ -19,6 +19,10 @@ class OverlappingTrianglesLoss(nn.Module):
         vertices = simplified_data["sampled_vertices"]
         faces = simplified_data["simplified_faces"]
 
+        # If no faces, return zero loss
+        if faces.shape[0] == 0:
+            return torch.tensor(0.0, device=vertices.device)
+
         # 1. Sample points from each triangle
         sampled_points = self.sample_points_from_triangles(vertices, faces)
 
@@ -33,7 +37,7 @@ class OverlappingTrianglesLoss(nn.Module):
         return overlap_penalty
 
     def sample_points_from_triangles(
-        self, vertices: torch.Tensor, faces: torch.Tensor
+            self, vertices: torch.Tensor, faces: torch.Tensor
     ) -> torch.Tensor:
         """
         Samples points from each triangle in the mesh.
@@ -61,7 +65,7 @@ class OverlappingTrianglesLoss(nn.Module):
 
         # Calculate the coordinates of the sampled points
         points = (
-            v0.unsqueeze(1) * (1 - u - v) + v1.unsqueeze(1) * u + v2.unsqueeze(1) * v
+                v0.unsqueeze(1) * (1 - u - v) + v1.unsqueeze(1) * u + v2.unsqueeze(1) * v
         )
 
         # Reshape to a (F * num_samples x 3) tensor
@@ -70,7 +74,7 @@ class OverlappingTrianglesLoss(nn.Module):
         return sampled_points
 
     def find_nearest_triangles(
-        self, sampled_points: torch.Tensor, vertices: torch.Tensor, faces: torch.Tensor
+            self, sampled_points: torch.Tensor, vertices: torch.Tensor, faces: torch.Tensor
     ) -> torch.Tensor:
         """
         Finds the k-nearest triangles for each sampled point.
@@ -86,17 +90,28 @@ class OverlappingTrianglesLoss(nn.Module):
         # Compute triangle centroids
         centroids = vertices[faces].mean(dim=1)
 
+        # Adjust k to be no larger than the number of triangles
+        k = min(self.k, faces.shape[0])
+        if k == 0:
+            # Return empty tensor if no triangles
+            return torch.empty(
+                (sampled_points.shape[0], 0),
+                dtype=torch.long,
+                device=sampled_points.device,
+            )
+
         # Use knn to find nearest triangles for each sampled point
-        _, indices = torch.cdist(sampled_points, centroids).topk(self.k, largest=False)
+        distances = torch.cdist(sampled_points, centroids)
+        _, indices = distances.topk(k, dim=1, largest=False)
 
         return indices
 
     def calculate_overlap_loss(
-        self,
-        sampled_points: torch.Tensor,
-        vertices: torch.Tensor,
-        faces: torch.Tensor,
-        nearest_triangles: torch.Tensor,
+            self,
+            sampled_points: torch.Tensor,
+            vertices: torch.Tensor,
+            faces: torch.Tensor,
+            nearest_triangles: torch.Tensor,
     ) -> torch.Tensor:
         """
         Calculates the overlap loss by checking if sampled points belong to multiple triangles.
@@ -128,7 +143,7 @@ class OverlappingTrianglesLoss(nn.Module):
         return overlap_penalty
 
     def calculate_area(
-        self, point: torch.Tensor, v0: torch.Tensor, v1: torch.Tensor, v2: torch.Tensor
+            self, point: torch.Tensor, v0: torch.Tensor, v1: torch.Tensor, v2: torch.Tensor
     ) -> float:
         """
         Calculates the area of a triangle formed by the point and a triangle's vertices.

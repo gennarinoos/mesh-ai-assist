@@ -16,42 +16,38 @@ def sample_data() -> Data:
 
 
 def test_neural_mesh_simplification_forward(sample_data: Data):
-    model = NeuralMeshSimplification(input_dim=3, hidden_dim=64, num_layers=3, k=5)
+    model = NeuralMeshSimplification(input_dim=3, hidden_dim=64, edge_hidden_dim=64)
     output = model(sample_data)
 
     # Add assertions to check the output structure and shapes
     assert isinstance(output, dict)
     assert "sampled_indices" in output
     assert "sampled_probs" in output
-    assert "sampled_vertices" in output  # New check
+    assert "sampled_vertices" in output
     assert "edge_index" in output
     assert "edge_probs" in output
     assert "candidate_triangles" in output
     assert "triangle_probs" in output
     assert "face_probs" in output
-    assert "simplified_faces" in output  # New check
+    assert "simplified_faces" in output
 
     # Check shapes
     assert output["sampled_indices"].dim() == 1
-    assert output["sampled_probs"].shape == (10,)
-    assert output["sampled_vertices"].dim() == 2
-    assert output["sampled_vertices"].shape[1] == 3
-    assert output["edge_index"].shape[0] == 2
-    assert output["edge_probs"].dim() == 1
+    # sampled_probs should match the number of sampled vertices
+    assert output["sampled_probs"].shape == output["sampled_indices"].shape
+    assert output["sampled_vertices"].shape[1] == 3  # 3D coordinates
+    assert output["edge_index"].shape[0] == 2  # Source and target nodes
     assert (
-        output["candidate_triangles"].shape[1] == 3
-        if output["candidate_triangles"].numel() > 0
-        else True
-    )
-    assert output["triangle_probs"].dim() == 1
-    assert (
-            output["face_probs"].shape[0] == output["candidate_triangles"].shape[0]
-    )  # New assertion
-    assert (
-        output["simplified_faces"].shape[1] == 3
-        if output["simplified_faces"].numel() > 0
-        else True
-    )
+            len(output["edge_probs"]) == output["edge_index"].shape[1]
+    )  # One prob per edge
+    assert output["candidate_triangles"].shape[1] == 3  # Triangle indices
+    assert len(output["triangle_probs"]) == len(
+        output["candidate_triangles"]
+    )  # One prob per triangle
+    assert len(output["face_probs"]) == len(
+        output["candidate_triangles"]
+    )  # One prob per triangle
+    assert output["simplified_faces"].shape[1] == 3  # Triangle indices
 
     # Additional checks
     assert (
@@ -94,7 +90,7 @@ def test_neural_mesh_simplification_forward(sample_data: Data):
 
 
 def test_generate_candidate_triangles():
-    model = NeuralMeshSimplification(input_dim=3, hidden_dim=64, num_layers=3, k=5)
+    model = NeuralMeshSimplification(input_dim=3, hidden_dim=64, edge_hidden_dim=64)
     edge_index = torch.tensor(
         [[0, 1, 1, 2, 3, 4], [1, 0, 2, 1, 4, 3]], dtype=torch.long
     )

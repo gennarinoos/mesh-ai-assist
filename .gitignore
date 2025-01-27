@@ -3,6 +3,7 @@ data/**/*.ply
 data/**/*.obj
 data/**/*.stl
 examples/data
+checkpoints
 
 file_structure.txt
 combined_output.txt

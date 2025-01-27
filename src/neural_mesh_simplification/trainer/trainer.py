@@ -13,18 +13,30 @@ from ..losses import CombinedMeshSimplificationLoss
 from ..metrics import chamfer_distance, normal_consistency, edge_preservation, hausdorff_distance
 from ..models import NeuralMeshSimplification
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class Trainer:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
+        logger.info("Initializing trainer...")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        logger.info(f"Using device: {self.device}")
+
+        logger.info("Initializing model...")
         self.model = NeuralMeshSimplification(
             input_dim=config["model"]["input_dim"],
             hidden_dim=config["model"]["hidden_dim"],
+            edge_hidden_dim=config["model"]["edge_hidden_dim"],
             num_layers=config["model"]["num_layers"],
             k=config["model"]["k"],
             edge_k=config["model"]["edge_k"],
+            target_ratio=config["model"]["target_ratio"],
         ).to(self.device)
+
+        logger.info("Setting up optimizer and loss...")
         self.optimizer = Adam(
             self.model.parameters(), lr=config["training"]["learning_rate"]
         )
@@ -41,25 +53,39 @@ class Trainer:
         self.early_stopping_counter = 0
         self.checkpoint_dir = config["training"]["checkpoint_dir"]
         os.makedirs(self.checkpoint_dir, exist_ok=True)
+
+        logger.info("Preparing data loaders...")
         self.train_loader, self.val_loader = self._prepare_data_loaders()
+        logger.info("Trainer initialization complete.")
 
     def _prepare_data_loaders(self):
+        logger.info(f"Loading dataset from {self.config['data']['data_dir']}")
         dataset = MeshSimplificationDataset(data_dir=self.config["data"]["data_dir"])
+        logger.info(f"Dataset size: {len(dataset)}")
+
         val_size = int(len(dataset) * self.config["data"]["val_split"])
         train_size = len(dataset) - val_size
+        logger.info(f"Splitting dataset: {train_size} train, {val_size} validation")
+
         train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
+        assert len(val_dataset) > 0, \
+            f"There is not enough data to define an evaluation set. len(dataset)={len(dataset)}, train_size={train_size}, val_size={val_size}"
         train_loader = DataLoader(
             train_dataset,
             batch_size=self.config["training"]["batch_size"],
             shuffle=True,
             num_workers=self.config["data"]["num_workers"],
+            follow_batch=["x", "pos"],
         )
         val_loader = DataLoader(
             val_dataset,
             batch_size=self.config["training"]["batch_size"],
             shuffle=False,
             num_workers=self.config["data"]["num_workers"],
+            follow_batch=["x", "pos"],
         )
+        logger.info("Data loaders prepared successfully")
+
         return train_loader, val_loader
 
     def train(self):
@@ -67,6 +93,13 @@ class Trainer:
             self._train_one_epoch(epoch)
             val_loss = self._validate(epoch)
             self.scheduler.step(val_loss)
+
+            # Apply weight decay after each epoch (as per paper)
+            weight_decay = self.config["training"]["weight_decay"]
+            with torch.no_grad():
+                for param in self.model.parameters():
+                    param.data *= weight_decay
+
             self._save_checkpoint(epoch, val_loss)
             if self._early_stopping(val_loss):
                 logging.info("Early stopping triggered.")
@@ -75,16 +108,25 @@ class Trainer:
     def _train_one_epoch(self, epoch: int):
         self.model.train()
         running_loss = 0.0
-        for batch in self.train_loader:
-            self.optimizer.zero_grad()
-            batch = batch.to(self.device)
-            output = self.model(batch)
-            loss = self.criterion(batch, output)
-            loss.backward()
-            self.optimizer.step()
-            running_loss += loss.item()
+        logger.debug(f"Starting epoch {epoch + 1}")
+        for batch_idx, batch in enumerate(self.train_loader):
+            logger.debug(f"Processing batch {batch_idx + 1}")
+            try:
+                self.optimizer.zero_grad()
+                batch = batch.to(self.device)
+                output = self.model(batch)
+                loss = self.criterion(batch, output)
+                loss.backward()
+                self.optimizer.step()
+                running_loss += loss.item()
+                if (batch_idx + 1) % 10 == 0:
+                    logger.info(f"Batch {batch_idx + 1} - Loss: {loss.item():.4f}")
+            except Exception as e:
+                logger.error(f"Error in batch {batch_idx + 1}: {str(e)}")
+                raise e
         logging.info(
-            f"Epoch [{epoch + 1}/{self.config['training']['num_epochs']}], Loss: {running_loss / len(self.train_loader)}")
+            f"Epoch [{epoch + 1}/{self.config['training']['num_epochs']}], Loss: {running_loss / len(self.train_loader)}"
+        )
 
     def _validate(self, epoch: int) -> float:
         self.model.eval()
@@ -136,12 +178,19 @@ class Trainer:
 
     def evaluate(self, data_loader: DataLoader) -> Dict[str, float]:
         self.model.eval()
-        metrics = {"chamfer_distance": 0.0, "normal_consistency": 0.0, "edge_preservation": 0.0,
-                   "hausdorff_distance": 0.0}
+        metrics = {
+            "chamfer_distance": 0.0,
+            "normal_consistency": 0.0,
+            "edge_preservation": 0.0,
+            "hausdorff_distance": 0.0
+        }
         with torch.no_grad():
             for batch in data_loader:
                 batch = batch.to(self.device)
                 output = self.model(batch)
+
+                # TODO: Define methods that can operate on a batch instead of a trimesh object
+
                 metrics["chamfer_distance"] += chamfer_distance(batch, output)
                 metrics["normal_consistency"] += normal_consistency(batch, output)
                 metrics["edge_preservation"] += edge_preservation(batch, output)

@@ -57,7 +57,8 @@ pip install -e .
 python examples/example.py
 ```
 
-3. Collect the simplified meshes in `examples/data/simplified`
+3. Collect the simplified meshes in `examples/data`. The simplified mesh objects file name will be the ones prefixed
+   with `simplified_`.
 
 ### Data Preparation
 
@@ -86,7 +87,7 @@ You can use the `--data_path` argument to specify the path to the dataset. The s
 To train the model on your own dataset with the prepared data:
 
 ```bash
-python ./scripts/train.py --data_path data/processed --config scripts/train_config.yml
+python ./scripts/train.py --data_path data/processed --config configs/default.yaml
 ```
 
 Specify a different `--data_path` if you have your data in a different location.
@@ -100,7 +101,7 @@ If the training was interrupted, you can resume it by specifying the path to the
 To evaluate the model on a test set:
 
 ```bash
-python ./scripts/evaluate.py --config scripts/train_config.yml --eval_data_path /path/to/test/set
+python ./scripts/evaluate.py --config configs/default.yaml --eval_data_path /path/to/test/set --checkpoint /path/to/checkpoint.pth
 ```
 
 ### Inference
@@ -108,9 +109,10 @@ python ./scripts/evaluate.py --config scripts/train_config.yml --eval_data_path 
 To simplify a mesh using the trained model:
 
 ```bash
-python ./scripts/inference.py --input-file /path/to/your/mesh.obj --output-file /path/to/output.obj --model-checkpoint /path/to/checkpoint.pth --device cpu
+python ./scripts/inference.py --input-file /path/to/your/mesh.obj --model-checkpoint /path/to/checkpoint.pth --device cpu
 ```
 
+This will create a file next to the input file with suffix `_simplified`
 If you have a CUDA-compatible GPU, you can specify `--device cuda` to use it for inference.
 
 ### Citation

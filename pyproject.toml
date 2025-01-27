@@ -6,10 +6,10 @@ build-backend = "setuptools.build_meta"
 name = "neural-mesh-simplification"
 version = "0.1.0"
 description = "A neural network-based approach to mesh simplification"
-authors = [{name = "Martin Normark", email = "m@martinnormark.com"}]
-license = {file = "LICENSE"}
+authors = [{ name = "Martin Normark", email = "m@martinnormark.com" }, { name = "Gennaro Frazzingaro", email = "gennaro@thinair.ar" }]
+license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
