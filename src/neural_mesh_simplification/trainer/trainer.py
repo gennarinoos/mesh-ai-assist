@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from typing import Dict, Any
 
 import torch
@@ -12,6 +13,11 @@ from ..data import MeshSimplificationDataset
 from ..losses import CombinedMeshSimplificationLoss
 from ..metrics import chamfer_distance, normal_consistency, edge_preservation, hausdorff_distance
 from ..models import NeuralMeshSimplification
+
+handler = logging.StreamHandler(sys.stdout)
+root_logger = logging.getLogger()
+root_logger.addHandler(handler)
+root_logger.setLevel(logging.INFO)
 
 
 class Trainer:
@@ -48,6 +54,8 @@ class Trainer:
         val_size = int(len(dataset) * self.config["data"]["val_split"])
         train_size = len(dataset) - val_size
         train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
+        assert len(val_dataset) > 0, \
+            f"There is not enough data to define an evaluation set. len(dataset)={len(dataset)}, train_size={train_size}, val_size={val_size}"
         train_loader = DataLoader(
             train_dataset,
             batch_size=self.config["training"]["batch_size"],
@@ -142,6 +150,9 @@ class Trainer:
             for batch in data_loader:
                 batch = batch.to(self.device)
                 output = self.model(batch)
+
+                # TODO: Define methods that can operate on a batch instead of a trimesh object
+
                 metrics["chamfer_distance"] += chamfer_distance(batch, output)
                 metrics["normal_consistency"] += normal_consistency(batch, output)
                 metrics["edge_preservation"] += edge_preservation(batch, output)

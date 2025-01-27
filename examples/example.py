@@ -8,9 +8,15 @@ from neural_mesh_simplification.data.dataset import load_mesh
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, "data")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+train_config = os.path.join(script_dir, "../scripts/train_config.yml")
 
-# Initialize the simplifier
-simplifier = NeuralMeshSimplifier()
+
+def load_config(config_path):
+    import yaml
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file)
+    return config
 
 
 def save_mesh_to_file(mesh: trimesh.Geometry, file_name: str):
@@ -25,7 +31,7 @@ def save_mesh_to_file(mesh: trimesh.Geometry, file_name: str):
     print(f"Mesh saved to: {output_path}")
 
 
-def cube_example():
+def cube_example(simplifier: NeuralMeshSimplifier):
     print(f"Creating cube mesh")
     file = "cube.obj"
     mesh = trimesh.creation.box(extents=[2, 2, 2])
@@ -34,7 +40,7 @@ def cube_example():
     save_mesh_to_file(simplified_mesh, f"simplified_{file}")
 
 
-def sphere_example():
+def sphere_example(simplifier: NeuralMeshSimplifier):
     print(f"Creating sphere mesh")
     file = "sphere.obj"
     mesh = trimesh.creation.icosphere(subdivisions=2, radius=2)
@@ -43,7 +49,7 @@ def sphere_example():
     save_mesh_to_file(simplified_mesh, f"simplified_{file}")
 
 
-def cylinder_example():
+def cylinder_example(simplifier: NeuralMeshSimplifier):
     print(f"Creating cylinder mesh")
     file = "cylinder.obj"
     mesh = trimesh.creation.cylinder(radius=1, height=2)
@@ -52,7 +58,7 @@ def cylinder_example():
     save_mesh_to_file(simplified_mesh, f"simplified_{file}")
 
 
-def mesh_dropbox_example():
+def mesh_dropbox_example(simplifier: NeuralMeshSimplifier):
     print(f"Loading all meshes of type '.obj' in folder '{data_dir}'")
     mesh_files = [f for f in os.listdir(data_dir) if f.endswith('.obj')]
 
@@ -91,10 +97,20 @@ def mesh_dropbox_example():
 
 
 def main():
-    # cube_example()
-    # sphere_example()
-    # cylinder_example()
-    mesh_dropbox_example()
+    # Initialize the simplifier
+    config = load_config(config_path=train_config)
+    simplifier = NeuralMeshSimplifier(
+        input_dim=config["model"]["input_dim"],
+        hidden_dim=config["model"]["hidden_dim"],
+        num_layers=config["model"]["num_layers"],
+        k=config["model"]["k"],
+        edge_k=config["model"]["edge_k"]
+    )
+
+    # cube_example(simplifier)
+    # sphere_example(simplifier)
+    # cylinder_example(simplifier)
+    mesh_dropbox_example(simplifier)
 
 
 if __name__ == "__main__":

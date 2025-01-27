@@ -40,7 +40,7 @@ class CombinedMeshSimplificationLoss(nn.Module):
         chamfer_loss = self.prob_chamfer_loss(
             original_x,
             sampled_vertices,
-            simplified_data["sampled_probs"]
+            sampled_probs
         )
         surface_loss = self.prob_surface_loss(
             original_x,

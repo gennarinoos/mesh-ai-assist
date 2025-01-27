@@ -100,7 +100,7 @@ If the training was interrupted, you can resume it by specifying the path to the
 To evaluate the model on a test set:
 
 ```bash
-python ./scripts/evaluate.py --config scripts/train_config.yml --eval_data_path /path/to/test/set
+python ./scripts/evaluate.py --config scripts/train_config.yml --eval_data_path /path/to/test/set --checkpoint /path/to/checkpoint.pth
 ```
 
 ### Inference
@@ -108,9 +108,10 @@ python ./scripts/evaluate.py --config scripts/train_config.yml --eval_data_path 
 To simplify a mesh using the trained model:
 
 ```bash
-python ./scripts/inference.py --input-file /path/to/your/mesh.obj --output-file /path/to/output.obj --model-checkpoint /path/to/checkpoint.pth --device cpu
+python ./scripts/inference.py --input-file /path/to/your/mesh.obj --model-checkpoint /path/to/checkpoint.pth --device cpu
 ```
 
+This will create a file next to the input file with suffix `_simplified`
 If you have a CUDA-compatible GPU, you can specify `--device cuda` to use it for inference.
 
 ### Citation
